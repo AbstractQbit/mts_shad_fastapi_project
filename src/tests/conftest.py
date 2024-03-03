@@ -63,14 +63,26 @@ def override_get_async_session(db_session):
     return _override_get_async_session
 
 
+class MockJWTBearer:
+    from fastapi import Request
+
+    def __init__(self, auto_error: bool = False):
+        pass
+
+    async def __call__(self, request: Request):
+        return {"sub": "test"}  # return a mock payload
+
+
 # Мы не можем создать 2 приложения (app) - это приведет к ошибкам.
 # Поэтому, на время запуска тестов мы подменяем там зависимость с сессией
 @pytest.fixture(scope="function")
 def test_app(override_get_async_session):
     from src.configurations.database import get_async_session
     from src.main import app
+    from src.auth.jwt import authenticate
 
     app.dependency_overrides[get_async_session] = override_get_async_session
+    app.dependency_overrides[authenticate] = MockJWTBearer()
 
     return app
 

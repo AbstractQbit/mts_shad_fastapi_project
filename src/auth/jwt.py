@@ -45,3 +45,5 @@ class JWTBearer(HTTPBearer):
         except jwt.PyJWTError:
             raise HTTPException(status_code=403, detail="Token is invalid.")
         raise HTTPException(status_code=403, detail="Could not validate credentials.")
+
+authenticate = JWTBearer()

@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.auth.jwt import JWTBearer
+from src.auth.jwt import authenticate
 from src.configurations.database import get_async_session
 from src.models.sellers import Seller
 from src.schemas import (
@@ -50,7 +50,7 @@ async def get_all_sellers(session: DBSession):
 @seller_router.get(
     "/{seller_id}",
     response_model=ReturnedSellerWithBooks,
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(authenticate)],
 )
 async def get_seller(seller_id: int, session: DBSession):
     # res = await session.get(Seller, seller_id, options=[selectinload(Seller.books)])
@@ -64,7 +64,7 @@ async def get_seller(seller_id: int, session: DBSession):
     "/{seller_id}",
     response_model=ReturnedSeller,
     status_code=status.HTTP_202_ACCEPTED,
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(authenticate)],
 )
 async def update_seller(seller_id: int, seller: BaseSeller, session: DBSession):
     if updated_seller := await session.get(Seller, seller_id):
@@ -77,7 +77,7 @@ async def update_seller(seller_id: int, seller: BaseSeller, session: DBSession):
     return Response(status_code=status.HTTP_404_NOT_FOUND)
 
 
-@seller_router.delete("/{seller_id}", dependencies=[Depends(JWTBearer())])
+@seller_router.delete("/{seller_id}", dependencies=[Depends(authenticate)])
 async def delete_seller(seller_id: int, session: DBSession):
     deleted_seller = await session.get(Seller, seller_id)
     if deleted_seller:
