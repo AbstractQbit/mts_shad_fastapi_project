@@ -5,6 +5,7 @@ from icecream import ic
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.auth.jwt import JWTBearer
 from src.configurations.database import get_async_session
 from src.models.books import Book
 from src.schemas import IncomingBook, ReturnedAllBooks, ReturnedBook
@@ -16,7 +17,12 @@ DBSession = Annotated[AsyncSession, Depends(get_async_session)]
 
 
 # Ручка для создания записи о книге в БД. Возвращает созданную книгу.
-@books_router.post("/", response_model=ReturnedBook, status_code=status.HTTP_201_CREATED)  # Прописываем модель ответа
+@books_router.post(
+    "/",
+    response_model=ReturnedBook,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(JWTBearer())],
+)  # Прописываем модель ответа
 async def create_book(
     book: IncomingBook, session: DBSession
 ):  # прописываем модель валидирующую входные данные и сессию как зависимость.
@@ -53,7 +59,7 @@ async def get_book(book_id: int, session: DBSession):
 
 
 # Ручка для удаления книги
-@books_router.delete("/{book_id}")
+@books_router.delete("/{book_id}", dependencies=[Depends(JWTBearer())])
 async def delete_book(book_id: int, session: DBSession):
     deleted_book = await session.get(Book, book_id)
     ic(deleted_book)  # Красивая и информативная замена для print. Полезна при отладке.
@@ -66,7 +72,7 @@ async def delete_book(book_id: int, session: DBSession):
 
 
 # Ручка для обновления данных о книге
-@books_router.put("/{book_id}")
+@books_router.put("/{book_id}", dependencies=[Depends(JWTBearer())])
 async def update_book(book_id: int, new_data: ReturnedBook, session: DBSession):
     # Оператор "морж", позволяющий одновременно и присвоить значение и проверить его.
     if updated_book := await session.get(Book, book_id):

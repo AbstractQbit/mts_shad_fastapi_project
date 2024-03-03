@@ -17,8 +17,21 @@ content-type: application/json
 
 ###
 
+# Получаем JWT токен
+
+POST http://localhost:8000/api/v1/token/ HTTP/1.1
+content-type: application/json
+
+{
+    "email": "ivani@example.com",
+    "password": "123456"
+}
+
+###
+
 # Создаем книгу
 POST http://localhost:8000/api/v1/books/ HTTP/1.1
+Authorization: Bearer <token>
 content-type: application/json
 
 {
@@ -33,6 +46,7 @@ content-type: application/json
 
 # Создаем книгу 2
 POST http://localhost:8000/api/v1/books/ HTTP/1.1
+Authorization Bearer <token>
 content-type: application/json
 
 {
@@ -52,6 +66,7 @@ GET http://localhost:8000/api/v1/seller/ HTTP/1.1
 
 # Получаем одного продавца по его ИД
 GET http://localhost:8000/api/v1/seller/1 HTTP/1.1
+Authorization Bearer <token>
 
 ###
 
@@ -67,6 +82,7 @@ GET http://localhost:8000/api/v1/books/1 HTTP/1.1
 
 # Обновляем поля в данных о книге
 PUT http://localhost:8000/api/v1/books/1 HTTP/1.1
+Authorization Bearer <token>
 content-type: application/json
 
 {
@@ -82,6 +98,7 @@ content-type: application/json
 
 # Обновляем поля в данных о продавце
 PUT http://localhost:8000/api/v1/seller/1 HTTP/1.1
+Authorization Bearer <token>
 content-type: application/json
 
 {
@@ -94,6 +111,6 @@ content-type: application/json
 
 # Удаляем книгу
 DELETE http://localhost:8000/api/v1/books/1 HTTP/1.1
-content-type: application/json
+Authorization Bearer <token>
 
 ###
