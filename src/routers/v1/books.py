@@ -26,6 +26,7 @@ async def create_book(
         author=book.author,
         year=book.year,
         count_pages=book.count_pages,
+        seller_id=book.seller_id,
     )
     session.add(new_book)
     await session.flush()
@@ -58,8 +59,10 @@ async def delete_book(book_id: int, session: DBSession):
     ic(deleted_book)  # Красивая и информативная замена для print. Полезна при отладке.
     if deleted_book:
         await session.delete(deleted_book)
+        await session.flush()
+        return Response(status_code=status.HTTP_204_NO_CONTENT)  # Response может вернуть текст и метаданные.
 
-    return Response(status_code=status.HTTP_204_NO_CONTENT)  # Response может вернуть текст и метаданные.
+    return Response(status_code=status.HTTP_404_NOT_FOUND)
 
 
 # Ручка для обновления данных о книге
@@ -71,6 +74,7 @@ async def update_book(book_id: int, new_data: ReturnedBook, session: DBSession):
         updated_book.title = new_data.title
         updated_book.year = new_data.year
         updated_book.count_pages = new_data.count_pages
+        updated_book.seller_id = new_data.seller_id
 
         await session.flush()
 
