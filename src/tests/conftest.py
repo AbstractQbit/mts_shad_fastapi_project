@@ -1,4 +1,4 @@
-""" Это модуль с фикстурами для пайтеста.
+"""Это модуль с фикстурами для пайтеста.
 Фикстуры - это особые функции, которые не надо импортировать явно.
 Сам пайтест подтягивает их по имени из файла conftest.py
 """
@@ -11,9 +11,7 @@ import pytest_asyncio
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from src.configurations.settings import settings
-from src.models import books  # noqa
 from src.models.base import BaseModel
-from src.models.books import Book  # noqa F401
 
 # Переопределяем движок для запуска тестов и подключаем его к тестовой базе.
 # Это решает проблему с сохранностью данных в основной базе приложения.
@@ -65,14 +63,26 @@ def override_get_async_session(db_session):
     return _override_get_async_session
 
 
+class MockJWTBearer:
+    from fastapi import Request
+
+    def __init__(self, auto_error: bool = False):
+        pass
+
+    async def __call__(self, request: Request):
+        return {"sub": "test"}  # return a mock payload
+
+
 # Мы не можем создать 2 приложения (app) - это приведет к ошибкам.
 # Поэтому, на время запуска тестов мы подменяем там зависимость с сессией
 @pytest.fixture(scope="function")
 def test_app(override_get_async_session):
     from src.configurations.database import get_async_session
     from src.main import app
+    from src.auth.jwt import authenticate
 
     app.dependency_overrides[get_async_session] = override_get_async_session
+    app.dependency_overrides[authenticate] = MockJWTBearer()
 
     return app
 
@@ -82,3 +92,34 @@ def test_app(override_get_async_session):
 async def async_client(test_app):
     async with httpx.AsyncClient(app=test_app, base_url="http://127.0.0.1:8000") as test_client:
         yield test_client
+
+
+# Дефолтные данные для тестов
+
+seller_def = {
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "johndoe@example.com",
+    "password": "password",
+}
+
+seller2_def = {
+    "first_name": "Jane",
+    "last_name": "Smith",
+    "email": "janesmith@example.com",
+    "password": "password",
+}
+
+book_def = {
+    "title": "Eugeny Onegin",
+    "author": "Pushkin",
+    "year": 1823,
+    "count_pages": 240,
+}
+
+book2_def = {
+    "title": "Mziri",
+    "author": "Lermontov",
+    "year": 1840,
+    "count_pages": 200,
+}

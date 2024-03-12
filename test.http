@@ -4,16 +4,69 @@
 # Tunder Client не позволяет свободно импортировать-экспортировать записи,
 # поэтому перешел на этот плагин. Он тоже хорош :-)
 
+# Создаем продавца
+POST http://localhost:8000/api/v1/seller/ HTTP/1.1
+content-type: application/json
+
+{
+    "first_name": "Ivan",
+    "last_name": "Ivanov",
+    "email": "ivani@example.com",
+    "password": "123456"
+}
+
+###
+
+# Получаем JWT токен
+
+POST http://localhost:8000/api/v1/token/ HTTP/1.1
+content-type: application/json
+
+{
+    "email": "ivani@example.com",
+    "password": "123456"
+}
+
+###
+
 # Создаем книгу
 POST http://localhost:8000/api/v1/books/ HTTP/1.1
+Authorization: Bearer <token>
 content-type: application/json
 
 {
     "title": "Wrong Code",
     "author": "Robert Martin",
     "pages": 104,
-    "year": 2007
+    "year": 2007,
+    "seller_id": 1
 }
+
+###
+
+# Создаем книгу 2
+POST http://localhost:8000/api/v1/books/ HTTP/1.1
+Authorization Bearer <token>
+content-type: application/json
+
+{
+    "title": "Eugeny Onegin",
+    "author": "Pushkin",
+    "pages": 104,
+    "year": 2001,
+    "seller_id": 1
+}
+
+###
+
+# Получаем список продавцов
+GET http://localhost:8000/api/v1/seller/ HTTP/1.1
+
+###
+
+# Получаем одного продавца по его ИД
+GET http://localhost:8000/api/v1/seller/1 HTTP/1.1
+Authorization Bearer <token>
 
 ###
 
@@ -29,6 +82,7 @@ GET http://localhost:8000/api/v1/books/1 HTTP/1.1
 
 # Обновляем поля в данных о книге
 PUT http://localhost:8000/api/v1/books/1 HTTP/1.1
+Authorization Bearer <token>
 content-type: application/json
 
 {
@@ -36,13 +90,27 @@ content-type: application/json
     "author": "Robert Martin",
     "count_pages": 10,
     "year": 2007,
-    "id": 0
+    "id": 0,
+    "seller_id": 1
+}
+
+###
+
+# Обновляем поля в данных о продавце
+PUT http://localhost:8000/api/v1/seller/1 HTTP/1.1
+Authorization Bearer <token>
+content-type: application/json
+
+{
+    "first_name": "Ivan",
+    "last_name": "Petrov",
+    "email": "ivanp@example.com"
 }
 
 ###
 
 # Удаляем книгу
 DELETE http://localhost:8000/api/v1/books/1 HTTP/1.1
-content-type: application/json
+Authorization Bearer <token>
 
 ###
